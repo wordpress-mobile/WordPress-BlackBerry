@@ -39,13 +39,13 @@ Dialog {
             
             Label {
                 horizontalAlignment: HorizontalAlignment.Left
-                text: "Leave a reply"
+                text: qsTr("Leave a reply")
             }
             
             
             Button {
                 horizontalAlignment: HorizontalAlignment.Right
-                text: "Cancel reply"
+                text: qsTr("Cancel reply")
                 
                 onClicked: {
                     close();
@@ -68,7 +68,7 @@ Dialog {
             id: pc
             horizontalAlignment: HorizontalAlignment.Right
             verticalAlignment: VerticalAlignment.Bottom
-            text: "Post Comment"
+            text: qsTr("Post Comment")
             
             
             onClicked: {
@@ -76,7 +76,7 @@ Dialog {
                 {
                     pc.imageSource = "asset:///images/loading.gif";
                     pc.enabled = false;
-                    wpu.newComment(post_id, rep_content.text, parent_id);
+                    wpu.buildWPXML("wp.newComment", true, ["post_id"], [post_id], ["content", "comment_parent"], [rep_content.text, parent_id]);
                     wpu.dataReady_newComment.connect(rd.rd_onDataReady);
                 }
                 

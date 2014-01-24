@@ -29,9 +29,9 @@ Page {
             title: qsTr("Select Picture")
             mode: FilePickerMode.Picker
             onFileSelected: {
-		wpu.uploadFile(selectedFiles[0]);
+		        wpu.uploadFile(selectedFiles[0]);
                 wpu.dataReady.connect(mp_mpp.mp_onDataReady);
-                mp_ci.body = "Uploading picture\nplease wait...";
+                mp_ci.body = qsTr("Uploading picture\nplease wait...");
                 mp_ci.open();
             }
         }
@@ -39,17 +39,23 @@ Page {
     
     actions: [
         ActionItem {
-            title: "Save"
+            title: qsTr("Save")
             imageSource: "asset:///images/save.png"
             ActionBar.placement: ActionBarPlacement.OnBar
             
             onTriggered: {
-                mp_ci.body = "Creating the new " +((mp_mpp.post_showpage) ? "page" : "post") + "\nplaease wait...";
-                mp_ci.open();
-                wpu.makePost(mp_mpp.post_showpage, posttitle.text, postcontent.text.trim(), ((posttype.selectedValue) ? posttype.selectedValue : "" ) , poststatus.selectedValue);
-                if ( mp_mpp.post_showpage )
-                	 wpu.dataReady_newPage.connect(mp_mpp.mp_onDataReady);
-                else wpu.dataReady_newPost.connect(mp_mpp.mp_onDataReady);
+                if ( posttitle.text, postcontent.text, poststatus.selectedValue )
+                {
+                	mp_ci.body = qsTr("Creating the new " +((mp_mpp.post_showpage) ? "page" : "post") + "\nplaease wait...");
+                	mp_ci.open();
+                    wpu.buildWPXML("wp.newPost", true, [], [], ["post_type", "post_status", "post_title", "post_content"], [ ( (mp_mpp.post_showpage) ? "page" : ((posttype.selectedValue) ? posttype.selectedValue : "" ) ), poststatus.selectedValue, posttitle.text, postcontent.text.trim()] );
+                	if ( mp_mpp.post_showpage )
+                	 	wpu.dataReady_newPage.connect(mp_mpp.mp_onDataReady);
+                	else wpu.dataReady_newPost.connect(mp_mpp.mp_onDataReady);
+                } else {
+                    mp_spt.body = qsTr('Insufficient parameters to make a new post!');
+                    mp_spt.exec();
+                }
             }
         },
         ActionItem {
@@ -84,6 +90,8 @@ Page {
             postcontent.editor.insertPlainText("<img src=\"" + mp_a['url'] + "\" alt=\"desc\" />"); // width=\"480\" height=\"800\" class=\"aligncenter\" />");
             mp_ci.close();
         } else console.log("wrg : smtg wrong"); /* TODO */
+        
+        wpu.resetRes();
     }
 
 
@@ -135,11 +143,20 @@ Page {
         
         DropDown {
             id: poststatus
-            title: qsTr("Status");
+            title: qsTr("Status")
+
+            Option {
+                text: qsTr("Draft")
+                value: "draft"
+                selected: true
+            }
+            Option {
+                text: qsTr("Pending")
+                value: "pending"
+            }
             Option {
                 text: qsTr("Public");
-                value: "public"
-                selected: true
+                value: "publish"
             }
             Option {
                 text: qsTr("Private");

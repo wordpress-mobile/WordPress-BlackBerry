@@ -21,14 +21,14 @@ Page {
         MultiSelectActionItem {
             id: msa
             multiSelectHandler: listView.multiSelectHandler
-            title: "select blog(s)"
+            title: qsTr("select blog(s)")
         }
     ]
     
     attachedObjects: [
         SystemToast {
             id: myQmlToast
-            body: "Unable to register account\nPlease try again."
+            body: qsTr("Unable to register account\nPlease try again.")
             button.label: "Ok"
             button.enabled: true
         }
@@ -37,6 +37,7 @@ Page {
     
     function moveOn()
     {
+        navigationPane.mb = true;
             navigationPane.pop();
     }
     
@@ -56,7 +57,7 @@ Page {
                 status: qsTr("None selected");
                 actions: [
                     ActionItem {
-                        title: "add selected"
+                        title: qsTr("add selected")
                         imageSource: "asset:///images/add.png"
                         
                         onTriggered: {
@@ -65,6 +66,7 @@ Page {
                                 for (var i = 0; i < selectionList.length; i ++) {
                                     var selectedItem = listView.dataModel.data(selectionList[i]);
                                     wpu.setBlogsInfo(selectedItem.blogid, selectedItem.xmlrpc);
+                                    
                                     moveOn();
                                 }
 
@@ -91,7 +93,7 @@ Page {
                         id: bitem
                         imageSpaceReserved: false
                         textFormat: TextFormat.Html
-                        title: ListItemData.blogName
+                        title: qsTr(ListItemData.blogName)
                         description: ListItemData.url
                         
                         

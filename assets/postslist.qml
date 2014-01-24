@@ -12,7 +12,15 @@ Page {
 
     property bool post_showpage;
     property variant post_savemodel;
+    property string post_type;
 
+
+	onPost_showpageChanged: {
+     if ( post_plp.post_showpage )
+         post_type = "page";
+     else post_type = "post"
+    }
+	
     function post_restoreItems()
     {
         if ( post_savemodel )
@@ -29,7 +37,7 @@ Page {
         	post_plListView.setDataModel(null);
 
         post_plind.start();
-        wpu.getPosts(post_plp.post_showpage);
+        wpu.buildWPXML("wp.getPosts", true, [], [], ["post_type"], [post_type]);
         if ( post_plp.post_showpage )
         	wpu.dataReady_getPages.connect(post_plp.post_onDataReady);
         else wpu.dataReady_getPosts.connect(post_plp.post_onDataReady);
@@ -59,7 +67,7 @@ Page {
     }
 
     titleBar: TitleBar {
-        title: (!post_plp.post_showpage ) ? "Posts" : "Pages"
+        title: (!post_plp.post_showpage ) ? qsTr("Posts") : qsTr("Pages")
     }
 
     attachedObjects: [
@@ -93,12 +101,16 @@ Page {
             onFinished: {
                 var x = result;
                 if (x == SystemUiResult.ConfirmButtonSelection) {
-                    post_ci_pl.body = "Deleting post \"" + ptitle + "\" \nPlease wait...";
+                    post_ci_pl.body = qsTr("Deleting post \"" + ptitle + "\" \nPlease wait...");
                     post_ci_pl.open();
+                    wpu.buildWPXML("wp.deletePost", true, ["post_id"], [pid], [], []);
+                    wpu.dataReady_delPost.connect(post_plp.post_onDataReady);
+                    /*
                     wpu.deletePost(post_plp.post_showpage,pid);
                     if ( post_plp.post_showpage )
                     	wpu.dataReady_delPage.connect(post_plp.post_onDataReady);
                     else wpu.dataReady_delPost.connect(post_plp.post_onDataReady);
+                    */
                 } else if (x == SystemUiResult.CancelButtonSelection) {
                     console.log("cancel");
                 }
@@ -108,7 +120,7 @@ Page {
 
     actions: [
         ActionItem {
-            title: "New"
+            title: qsTr("New")
             imageSource: "asset:///images/add.png"
             ActionBar.placement: ActionBarPlacement.InOverflow
 
@@ -122,7 +134,7 @@ Page {
             }
         },
         ActionItem {
-            title: "Refresh"
+            title: qsTr("Refresh")
             imageSource: "asset:///images/refresh.png"
 
             ActionBar.placement: ActionBarPlacement.InOverflow
@@ -164,7 +176,7 @@ Page {
                             id: post_sli
                             property variant internalWpu
                             textFormat: TextFormat.Html
-                            title: ListItemData.post_title
+                            title: qsTr(ListItemData.post_title)
                             description: ListItemData.date //post_date
                             status: ListItemData.post_status
                             imageSpaceReserved: false

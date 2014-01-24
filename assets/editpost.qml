@@ -1,4 +1,5 @@
 import bb.cascades 1.0
+import bb.cascades.pickers 1.0
 
 Page {
     id: ep
@@ -9,7 +10,7 @@ Page {
     property bool post_showpage;
     
     onPost_idChanged: {
-        wpu.getPost(ep.post_showpage, post_id);
+        wpu.buildWPXML("wp.getPost", true, ["post_id"], [post_id], ["post_type"], [((ep.post_showpage) ? "page" : "post")]);
         if ( ep.post_showpage )
         	wpu.dataReady_getPage.connect(ep.ep_onDataReady);
         else wpu.dataReady_getPost.connect(ep.ep_onDataReady);
@@ -28,6 +29,9 @@ Page {
                 navpagepane.pop();
                 navpagepane.firstPage.post_loadData();
             }
+        } else if (ep_a['file']) {
+            pcontent.editor.insertPlainText("<img src=\"" + ep_a['url'] + "\" alt=\"desc\" />"); // width=\"480\" height=\"800\" class=\"aligncenter\" />");
+            ci_ep.close();
         } else {
             pinfos = ep_a;
             epind.stop();
@@ -37,25 +41,46 @@ Page {
     attachedObjects: [
         CustomIndicator {
             id: ci_ep
+        },
+        FilePicker {
+            id: ep_filePicker
+            type: FileType.Picture
+            title: qsTr("Select Picture")
+            mode: FilePickerMode.Picker
+            onFileSelected: {
+                wpu.uploadFile(selectedFiles[0]);
+                wpu.dataReady.connect(ep.ep_onDataReady);
+                ci_ep.body = qsTr("Uploading picture\nplease wait...");
+                ci_ep.open();
+            }
         }
     ]
     
     actions: [
         ActionItem {
-            title: "Edit"
+            title: qsTr("Edit")
             imageSource: "asset:///images/save.png"
             ActionBar.placement: ActionBarPlacement.OnBar
             
             onTriggered: {
                 if ( ptitle.text != "" && pcontent.text != "" && pstate.selectedValue != "" && pformat.selectedValue != "" )
                 {
-                                    ci_ep.body = "Editing post\nPlease wait...";
+                                    ci_ep.body = qsTr("Editing post\nPlease wait...");
                                     ci_ep.open();
-                                    wpu.editPost(ep.post_showpage, ep.post_id,ptitle.text,pcontent.text,pstate.selectedValue, pformat.selectedValue);
+                                    wpu.buildWPXML("wp.editPost", true, ["post_id"], [ep.post_id], ["post_title", "post_content", "post_status", "post_format", "post_type"], [ptitle.text, pcontent.text, pstate.selectedValue, pformat.selectedValue, (ep.post_showpage) ? "page" : "post"] );
                                     if ( ep.post_showpage )
                                     	wpu.dataReady_editPage.connect(ep.ep_onDataReady);
                                     else wpu.dataReady_editPost.connect(ep.ep_onDataReady);
                 }
+            }
+        },
+        ActionItem {
+            title: qsTr("Add Image")
+            imageSource: "asset:///images/addimage.png"
+            ActionBar.placement: ActionBarPlacement.OnBar
+
+            onTriggered: {
+                ep_filePicker.open();
             }
         }
     ]
@@ -95,12 +120,12 @@ Page {
             
             TextField {
                 id: ptitle
-                text: (pinfos) ? pinfos.post_title : ""
+                text: (pinfos) ? qsTr(pinfos.post_title) : ""
             }
             TextArea {
                 id: pcontent
                 preferredHeight: 300
-                text: (pinfos) ? pinfos.post_content : ""
+                text: (pinfos) ? qsTr(pinfos.post_content) : ""
             }
             /*
              * ***FIXME****
@@ -117,9 +142,20 @@ Page {
             DropDown {
                 id: pstate
                 title: qsTr("Status")
+
+                Option {
+                    text: qsTr("Draft")
+                    value: "draft"
+                    selected: (pinfos) ? (value == pinfos.post_status ) : false
+                }
+                Option {
+                    text: qsTr("Pending")
+                    value: "pending"
+                    selected: (pinfos) ? (value == pinfos.post_status ) : false
+                }
                 Option {
                     text: qsTr("Public")
-                    value: "public"
+                    value: "publish"
                     selected: (pinfos) ? (value == pinfos.post_status ) : false
                 }
                 Option {
@@ -132,7 +168,7 @@ Page {
             
             DropDown {
                 id: pformat
-                title: "Type"
+                title: qsTr("Type")
                 visible: !post_showpage
                 selectedIndex: -1
                 Option {

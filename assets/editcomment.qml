@@ -9,7 +9,7 @@ Page {
     property variant ec_cinfos;
     
     onEc_comment_idChanged: {
-        wpu.getComment(ec_comment_id);
+        wpu.buildWPXML("wp.getComment", true, ["post_id"], [ec_comment_id], [], []);
         wpu.dataReady_getComment.connect(ecp.ec_onDataReady);
     }
     
@@ -31,18 +31,18 @@ Page {
     
     actions: [
         ActionItem {
-            title: "Edit"
+            title: qsTr("Edit")
             imageSource: "asset:///images/save.png"
             ActionBar.placement: ActionBarPlacement.OnBar
             
             
             onTriggered: {
-                //crude sanity check
+                //crude (in)sanity check
                 if ( auth.text != "" && authmail.text !="" && authurl.text != "" && ccontent.text !="" && cstate.selectedValue != "" )
                 {
-                    ec_ci.body = "Making changes\nPlease wait...";
+                    ec_ci.body = qsTr("Making changes\nPlease wait...");
                     ec_ci.open();
-                    wpu.editComment(ec_comment_id, cstate.selectedValue, ccontent.text, auth.text, authmail.text, authurl.text);
+                    wpu.buildWPXML("wp.editComment", true, ["comment_id"], [ec_comment_id], ["status", "content", "author", "author_email", "author_url"], [cstate.selectedValue, ccontent.text, auth.text, authmail.text, authurl.text] );
                     wpu.dataReady_editComment.connect(ecp.ec_onDataReady);
                 }
             }
@@ -83,21 +83,21 @@ Page {
             }
             TextField {
                 id: auth
-                text: (ec_cinfos) ? ec_cinfos.author : ""
+                text: (ec_cinfos) ? qsTr(ec_cinfos.author) : ""
             }
             Label {
                 text: qsTr("Author e-mail")
             }
             TextField {
                 id: authmail
-                text: (ec_cinfos) ? ec_cinfos.author_email : ""
+                text: (ec_cinfos) ? qsTr(ec_cinfos.author_email) : ""
             }
             Label {
                 text: qsTr("Author url")
             }
             TextField {
                 id: authurl
-                text: (ec_cinfos) ? ec_cinfos.author_url : ""
+                text: (ec_cinfos) ? qsTr(ec_cinfos.author_url) : ""
             }
             Label {
                 text: qsTr("Content")
@@ -106,7 +106,7 @@ Page {
                 id: ccontent
                 minHeight: 150
                 preferredHeight: 200
-                text: (ec_cinfos) ? ec_cinfos.content : ""
+                text: (ec_cinfos) ? qsTr(ec_cinfos.content) : ""
             }
             Divider {
             

@@ -17,6 +17,10 @@ Page {
             id: pageDefinition
             source: "blogslist.qml"
         },
+        ComponentDefinition {
+            id: polist
+            source: "postslist.qml"
+        },
         SystemToast {
             id: myQmlToast
             body: "Unable to register account\nPlease try again."
@@ -37,7 +41,20 @@ Page {
             si.enabled = true
             si.imageSource = '';
             //    	wpu.resetRes();
-        } else {
+        } else if ( a["oneblog"] ) {
+            wpu.setUsername(usr.text);
+            wpu.setPassword(pwd.text);
+            
+            navigationPane.pop();
+            /*
+            var ppost_ = polist.createObject();
+            ppost_.post_showpage = false;
+            navpostpane.push(ppost_);
+            ppost_.post_loadData();
+            */
+            wpu.resetRes();
+        } 
+        else {
             wpu.setUsername(usr.text);
             wpu.setPassword(pwd.text);
             
@@ -87,38 +104,38 @@ Page {
                 bottomPadding: 50
                 
                 Label {
-                    text: "Username"
+                    text: qsTr("Username")
                 }
                 
                 TextField {
                     id: usr
                     clearButtonVisible: true
-                    hintText: "username"
+                    hintText: qsTr("username")
                     
                     input.flags: TextInputFlag.AutoCapitalizationOff
                 }
                 
                 Label {
                     topMargin: 50
-                    text: "Password"
+                    text: qsTr("Password")
                 }
                 
                 TextField {
                     id: pwd
                     inputMode: TextFieldInputMode.Password
                     
-                    hintText: "YouRpAsSwOrD"
+                    hintText: qsTr("YouRpAsSwOrD")
                 }
                 
                 Label {
                     topMargin: 50
-                    text: "Blog Address"
+                    text: qsTr("Blog Address")
                 }
                 
                 TextField {
                     id: blgd
                     
-                    hintText: "leave empty if unsure"
+                    hintText: qsTr("leave empty if unsure")
                     input.flags: TextInputFlag.AutoCapitalizationOff
 
                 }
@@ -133,12 +150,14 @@ Page {
                 //bottomPadding: 25//50
                 Button {
                     id: si
-                    text: "Sign In"
+                    text: qsTr("Sign In")
                     
                     onClicked: {
                         if (usr.text && pwd.text) {
                             si.imageSource = "asset:///images/loading.gif";
                             si.enabled = false;
+                            wpu.setUsername(usr.text);
+                            wpu.setPassword(pwd.text);
                             wpu.getBlogs(usr.text, pwd.text, blgd.text);
                             wpu.dataReady_getUsersBlogs.connect(lp.onDataReady);
                         } else {; /*** TODO ***/
